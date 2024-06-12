@@ -1,0 +1,3 @@
+/home/ban/ドキュメント/GitHub/
+C:\Users\ban\AppData\Local\Programs\Microsoft VS Code\Code.exe
+/usr/share/code/code
