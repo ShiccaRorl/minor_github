@@ -155,7 +155,8 @@ class ProjectManager:
         ]
     
         github_layout = [
-            [sg.Text("GitHub Placeholder")]
+            [sg.Text("GitHub Placeholder")],
+            [sg.Text(f"{self.file_name}", key="--")],
         ]
     
         layout = [
