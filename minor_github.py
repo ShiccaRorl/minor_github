@@ -4,53 +4,11 @@ import PySimpleGUI as sg
 
 class GitGUI:
     def __init__(self):
-        self.window = sg.Window("Git GUI", self.get_layout(), resizable=True, finalize=True)
         self.commit_index = 0
         self.commit_hashes = self.get_git_log()
+        self.window = sg.Window("Git GUI", self.get_layout(), resizable=True, finalize=True)
 
     def get_layout(self):
-        # Create separate list boxes for each layout to avoid reusing elements
-        project_list_main = [
-            [sg.Listbox(self.get_project(), size=(50, 20), key="-プロジェクト_MAIN-")]
-        ]
-        
-        project_list_setup = [
-            [sg.Listbox(self.get_project(), size=(50, 20), key="-プロジェクト_SETUP-")]
-        ]
-
-        setup = [
-            [sg.Text("プロジェクトディレクトリ")],
-            [sg.InputText(self.project_directory, key="-プロジェクトディレクトリ-"), sg.FolderBrowse()]
-        ]
-    
-        ms_visual_windows = [
-            [sg.Text("MSVisual Studio Code Windows")],
-            [sg.InputText(self.ms_visual_windows, key="-ms_visual_windows-"), sg.FolderBrowse()]
-        ]
-    
-        ms_visual_linux = [
-            [sg.Text("MSVisual Studio Code Linux")],
-            [sg.InputText(self.ms_visual_linux, key="-ms_visual_linux-"), sg.FolderBrowse()]
-        ]
-    
-        setup_layout = [
-            *project_list_setup,
-            [sg.Column(setup)],
-            [sg.Column(ms_visual_windows)],
-            [sg.Column(ms_visual_linux)],
-        ]
-    
-        main_run_layout = [
-            [sg.Text("Main Run Placeholder")],
-            *project_list_main,
-            [sg.Button("開く")],
-        ]
-    
-        github_layout = [
-            [sg.Text("GitHub Placeholder")],
-            [sg.Text(f"{self.file_name}", key="--")],
-        ]
-    
         layout = [
             [sg.Button("始める"), sg.Input("file name", key="-file_name-")],
             [sg.Button("←"), sg.Button("checkout"), sg.Button("→")],
