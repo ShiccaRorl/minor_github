@@ -9,7 +9,6 @@ class GitGUI:
         self.commit_hashes = self.get_git_log()
 
     def get_layout(self):
-<<<<<<< Updated upstream
         # Create separate list boxes for each layout to avoid reusing elements
         project_list_main = [
             [sg.Listbox(self.get_project(), size=(50, 20), key="-プロジェクト_MAIN-")]
@@ -52,8 +51,6 @@ class GitGUI:
             [sg.Text(f"{self.file_name}", key="--")],
         ]
     
-=======
->>>>>>> Stashed changes
         layout = [
             [sg.Button("始める"), sg.Input("file name", key="-file_name-")],
             [sg.Button("←"), sg.Button("checkout"), sg.Button("→")],
