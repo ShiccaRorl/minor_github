@@ -1,122 +1,15 @@
-import PySimpleGUI as sg
 import subprocess
-import datetime
-import glob
-import os
-import platform
+import sys
+import PySimpleGUI as sg
 
-class Minor_Github:
-    def __init__(self, project_directory):
-        self.project_directory = project_directory
-
-    def get_changed_files(self):
-        # 現在のディレクトリをプロジェクトディレクトリに変更
-        os.chdir(self.project_directory)
-
-        # 変更されたファイルのリストを取得
-        status_result = subprocess.run(["git", "status", "--porcelain"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if status_result.returncode != 0:
-            print(f"Error in git status: {status_result.stderr.decode('utf-8')}")
-            return []
-
-        changed_files = [line[3:] for line in status_result.stdout.decode('utf-8').splitlines()]
-        return changed_files
-
-    def commit_all(self, message=""):
-        changed_files = self.get_changed_files()
-        if not changed_files:
-            print("No changes to commit.")
-            return
-
-        # 変更されたファイルをステージング
-        for file in changed_files:
-            add_result = subprocess.run(["git", "add", file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if add_result.returncode != 0:
-                print(f"Error in git add {file}: {add_result.stderr.decode('utf-8')}")
-                return
-
-        # コミットメッセージを作成
-        commit_message = "commit " + datetime.datetime.now().strftime("%Y/%m/%d_%H:%M:%S") + "\n" + message
-        commit_result = subprocess.run(["git", "commit", "-m", commit_message], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if commit_result.returncode != 0:
-            print(f"Error in git commit: {commit_result.stderr.decode('utf-8')}")
-            return
-
-        # プッシュ
-        push_result = subprocess.run(["git", "push"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if push_result.returncode != 0:
-            print(f"Error in git push: {push_result.stderr.decode('utf-8')}")
-            return
-
-        print("All changes committed and pushed successfully.")
-
-    def commit_one_by_one(self, message=""):
-        changed_files = self.get_changed_files()
-        if not changed_files:
-            print("No changes to commit.")
-            return
-
-        # 変更されたファイルを一つずつコミット
-        for file in changed_files:
-            add_result = subprocess.run(["git", "add", file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if add_result.returncode != 0:
-                print(f"Error in git add {file}: {add_result.stderr.decode('utf-8')}")
-                continue
-
-            # コミットメッセージを作成
-            commit_message = "commit " + datetime.datetime.now().strftime("%Y/%m/%d_%H:%M:%S") + "\n" + message + "\nFile: " + file
-            commit_result = subprocess.run(["git", "commit", "-m", commit_message], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if commit_result.returncode != 0:
-                print(f"Error in git commit {file}: {commit_result.stderr.decode('utf-8')}")
-                continue
-
-            # プッシュ
-            push_result = subprocess.run(["git", "push"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if push_result.returncode != 0:
-                print(f"Error in git push: {push_result.stderr.decode('utf-8')}")
-                continue
-
-            print(f"File {file} committed and pushed successfully.")
-
-class OS_Kantei:
-    def get_os(self):
-        system = platform.system()
-        if system == "Windows":
-            return "Windows"
-        elif system == "Linux":
-            return "Linux"
-        else:
-            return "Unknown"
-
-class ProjectManager:
+class GitGUI:
     def __init__(self):
-        self.project_directory = ""
-        self.config_file = "config.txt"
-        self.project_directory = self.load_project_directory(0)
-        self.ms_visual_windows = self.load_project_directory(1)
-        self.ms_visual_linux = self.load_project_directory(2)
-    
-    def load_project_directory(self, line_num):
-        if os.path.exists(self.config_file):
-            with open(self.config_file, "r") as file:
-                lines = file.read().split("\n")
-                if len(lines) > line_num:
-                    return lines[line_num].strip()
-        return ""
+        self.window = sg.Window("Git GUI", self.get_layout(), resizable=True, finalize=True)
+        self.commit_index = 0
+        self.commit_hashes = self.get_git_log()
 
-    def save_project_directory(self, project_directory, ms_visual_windows, ms_visual_linux):
-        with open(self.config_file, "w") as file:
-            file.write(project_directory + "\n")
-            file.write(ms_visual_windows + "\n")
-            file.write(ms_visual_linux + "\n")
-
-    def get_project(self):
-        if self.project_directory:
-            project_directory = glob.glob(f"{self.project_directory}/*")
-            return project_directory
-        return []
-    
     def get_layout(self):
+<<<<<<< Updated upstream
         # Create separate list boxes for each layout to avoid reusing elements
         project_list_main = [
             [sg.Listbox(self.get_project(), size=(50, 20), key="-プロジェクト_MAIN-")]
@@ -159,50 +52,64 @@ class ProjectManager:
             [sg.Text(f"{self.file_name}", key="--")],
         ]
     
+=======
+>>>>>>> Stashed changes
         layout = [
-            [sg.TabGroup([[sg.Tab('main_run', main_run_layout), sg.Tab('Github', github_layout), sg.Tab('設定', setup_layout)]])],
-            [sg.Button('OK'), sg.Button('Cancel')]
+            [sg.Button("始める"), sg.Input("file name", key="-file_name-")],
+            [sg.Button("←"), sg.Button("checkout"), sg.Button("→")],
+            [sg.Text("", size=(50, 1), key="-STATUS-")]
         ]
-    
         return layout
 
-if __name__ == "__main__":
-    pm = ProjectManager()
-    layout = pm.get_layout()
-    window = sg.Window("Project Manager", layout)
-    OSs = OS_Kantei().get_os()
-    
-    while True:
-        event, values = window.read()
-        if event == sg.WIN_CLOSED or event == "Cancel":
-            break
-        if event == "OK":
-            project_directory = values["-プロジェクトディレクトリ-"]
-            ms_visual_windows = values["-ms_visual_windows-"]
-            ms_visual_linux = values["-ms_visual_linux-"]
-            
-            pm.save_project_directory(project_directory, ms_visual_windows, ms_visual_linux)
-        
-        elif event == "開く":
-            selected_project = values["-プロジェクト_MAIN-"]
-            ms_visual_windows = values["-ms_visual_windows-"]
-            ms_visual_linux = values["-ms_visual_linux-"]
-            if selected_project:
-                project_path = selected_project[0]
-                if OSs == "Windows":
-                    subprocess.run([ms_visual_windows, project_path])
-                elif OSs == "Linux":
-                    subprocess.run([ms_visual_linux, project_path])
-                else:
-                    print("OS不明です")
-                
-    window.close()
-    
-project_directory = "/home/ban/ドキュメント/GitHub/"
-mg = Minor_Github(project_directory)
-    
-# すべての変更を一度にコミット
-mg.commit_all("全体の変更をコミット")
+    def run_command(self, command):
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        if result.returncode != 0:
+            return f"Command failed: {command}\n{result.stderr}"
+        return result.stdout
 
-# 変更されたファイルを一つずつコミット
-mg.commit_one_by_one("ファイルごとの変更をコミット")
+    def update_status(self, message):
+        self.window['-STATUS-'].update(message)
+
+    def get_git_log(self):
+        log_output = self.run_command("git log --pretty=format:'%H'")
+        commit_hashes = log_output.strip().split('\n')
+        return commit_hashes
+
+    def checkout_commit(self, commit_hash):
+        response = sg.popup_yes_no("Checkout しますか？")
+        if response == 'Yes':
+            result = self.run_command(f"git checkout {commit_hash}")
+            self.update_status(result)
+
+    def get_events(self):
+        while True:
+            event, values = self.window.read()
+            if event == sg.WINDOW_CLOSED:
+                break
+
+            if event == "始める":
+                result = self.run_command("git stash")
+                self.update_status(result)
+            elif event == "←":
+                if self.commit_index < len(self.commit_hashes) - 1:
+                    self.commit_index += 1
+                    commit_hash = self.commit_hashes[self.commit_index]
+                    self.checkout_commit(commit_hash)
+            elif event == "checkout":
+                if "-file_name-" in values and values["-file_name-"]:
+                    file_name = values["-file_name-"]
+                    commit_hash = self.commit_hashes[self.commit_index]
+                    add_result = self.run_command(f"git add {file_name}")
+                    commit_result = self.run_command(f"git commit -m 'Revert {file_name} to previous state from commit {commit_hash}'")
+                    self.update_status(f"Reverted {file_name} to previous state from commit {commit_hash}\n{add_result}\n{commit_result}")
+            elif event == "→":
+                if self.commit_index > 0:
+                    self.commit_index -= 1
+                    commit_hash = self.commit_hashes[self.commit_index]
+                    self.checkout_commit(commit_hash)
+
+        self.window.close()
+
+if __name__ == "__main__":
+    git_gui = GitGUI()
+    git_gui.get_events()
